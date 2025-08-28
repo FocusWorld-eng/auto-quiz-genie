@@ -14,7 +14,241 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      question_responses: {
+        Row: {
+          ai_feedback: string | null
+          confidence: Database["public"]["Enums"]["confidence_level"] | null
+          created_at: string
+          id: string
+          is_correct: boolean | null
+          points_earned: number | null
+          question_id: string
+          requires_manual_review: boolean
+          student_answer: string
+          submission_id: string
+          teacher_feedback: string | null
+          teacher_override_score: number | null
+        }
+        Insert: {
+          ai_feedback?: string | null
+          confidence?: Database["public"]["Enums"]["confidence_level"] | null
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          points_earned?: number | null
+          question_id: string
+          requires_manual_review?: boolean
+          student_answer: string
+          submission_id: string
+          teacher_feedback?: string | null
+          teacher_override_score?: number | null
+        }
+        Update: {
+          ai_feedback?: string | null
+          confidence?: Database["public"]["Enums"]["confidence_level"] | null
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          points_earned?: number | null
+          question_id?: string
+          requires_manual_review?: boolean
+          student_answer?: string
+          submission_id?: string
+          teacher_feedback?: string | null
+          teacher_override_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_responses_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          correct_answer_index: number | null
+          created_at: string
+          grading_rubric: string | null
+          id: string
+          options: Json | null
+          order_number: number
+          points: number
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"]
+          quiz_id: string
+          sample_answer: string | null
+        }
+        Insert: {
+          correct_answer_index?: number | null
+          created_at?: string
+          grading_rubric?: string | null
+          id?: string
+          options?: Json | null
+          order_number: number
+          points?: number
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"]
+          quiz_id: string
+          sample_answer?: string | null
+        }
+        Update: {
+          correct_answer_index?: number | null
+          created_at?: string
+          grading_rubric?: string | null
+          id?: string
+          options?: Json | null
+          order_number?: number
+          points?: number
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["question_type"]
+          quiz_id?: string
+          sample_answer?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          is_completed: boolean
+          max_possible_score: number | null
+          needs_review: boolean
+          quiz_id: string
+          started_at: string
+          student_id: string
+          submitted_at: string | null
+          total_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          max_possible_score?: number | null
+          needs_review?: boolean
+          quiz_id: string
+          started_at?: string
+          student_id: string
+          submitted_at?: string | null
+          total_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          max_possible_score?: number | null
+          needs_review?: boolean
+          quiz_id?: string
+          started_at?: string
+          student_id?: string
+          submitted_at?: string | null
+          total_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_submissions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_published: boolean
+          lesson_text: string
+          mcq_count: number
+          short_answer_count: number
+          time_limit: number | null
+          title: string
+          topic: string
+          total_questions: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          lesson_text: string
+          mcq_count?: number
+          short_answer_count?: number
+          time_limit?: number | null
+          title: string
+          topic: string
+          total_questions?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          lesson_text?: string
+          mcq_count?: number
+          short_answer_count?: number
+          time_limit?: number | null
+          title?: string
+          topic?: string
+          total_questions?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +257,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      confidence_level: "high" | "medium" | "low"
+      question_type: "multiple_choice" | "short_answer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +385,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      confidence_level: ["high", "medium", "low"],
+      question_type: ["multiple_choice", "short_answer"],
+    },
   },
 } as const
