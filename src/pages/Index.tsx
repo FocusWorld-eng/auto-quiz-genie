@@ -1,205 +1,230 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { QuizCard } from "@/components/QuizCard";
-import { QuizResults } from "@/components/QuizResults";
-import { Play, Brain, Zap, Target } from "lucide-react";
+import { QuizGenerator } from "@/components/QuizGenerator";
+import { QuizList } from "@/components/QuizList";
+import { TakeQuiz } from "@/components/TakeQuiz";
+import { QuizResultsDetailed } from "@/components/QuizResultsDetailed";
+import { useAuth } from "@/hooks/useAuth";
+import { Play, Brain, Zap, Target, LogIn, UserCheck, GraduationCap, LogOut } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import { useNavigate } from "react-router-dom";
 
-interface Question {
-  id: number;
-  question: string;
-  options: string[];
-  correct: number;
+interface Quiz {
+  id: string;
+  title: string;
+  description: string;
+  topic: string;
+  total_questions: number;
+  time_limit: number;
 }
 
-const sampleQuestions: Question[] = [
-  {
-    id: 1,
-    question: "What is the capital of France?",
-    options: ["London", "Berlin", "Paris", "Madrid"],
-    correct: 2,
-  },
-  {
-    id: 2,
-    question: "Which planet is known as the Red Planet?",
-    options: ["Venus", "Mars", "Jupiter", "Saturn"],
-    correct: 1,
-  },
-  {
-    id: 3,
-    question: "What is the largest mammal in the world?",
-    options: ["African Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
-    correct: 1,
-  },
-  {
-    id: 4,
-    question: "In what year did World War II end?",
-    options: ["1944", "1945", "1946", "1947"],
-    correct: 1,
-  },
-  {
-    id: 5,
-    question: "What is the chemical symbol for gold?",
-    options: ["Go", "Gd", "Au", "Ag"],
-    correct: 2,
-  },
-];
-
 const Index = () => {
-  const [gameState, setGameState] = useState<"start" | "playing" | "results">("start");
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<number[]>([]);
+  const [currentView, setCurrentView] = useState<"dashboard" | "taking-quiz" | "results">("dashboard");
+  const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  const { user, profile, loading, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  const startQuiz = () => {
-    setGameState("playing");
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setShowResult(false);
-    setScore(0);
-    setUserAnswers([]);
-  };
-
-  const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex);
-    setTimeout(() => {
-      setShowResult(true);
-    }, 100);
-  };
-
-  const handleNext = () => {
-    if (selectedAnswer !== null) {
-      const newAnswers = [...userAnswers, selectedAnswer];
-      setUserAnswers(newAnswers);
-      
-      if (selectedAnswer === sampleQuestions[currentQuestion].correct) {
-        setScore(score + 1);
-      }
-    }
-
-    if (currentQuestion + 1 >= sampleQuestions.length) {
-      setGameState("results");
-    } else {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer(null);
-      setShowResult(false);
-    }
-  };
-
-  if (gameState === "results") {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4 flex items-center justify-center">
-        <QuizResults 
-          score={score} 
-          totalQuestions={sampleQuestions.length} 
-          onRestart={startQuiz}
-        />
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (gameState === "playing") {
+  // Not authenticated - show landing page
+  if (!user || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4 flex items-center justify-center">
-        <QuizCard
-          question={sampleQuestions[currentQuestion]}
-          currentQuestion={currentQuestion}
-          totalQuestions={sampleQuestions.length}
-          selectedAnswer={selectedAnswer}
-          showResult={showResult}
-          onAnswerSelect={handleAnswerSelect}
-          onNext={handleNext}
-        />
-      </div>
-    );
-  }
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+        {/* Navigation */}
+        <nav className="container mx-auto px-4 py-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+              AutoQuiz
+            </h1>
+            <Button onClick={() => navigate('/auth')} className="bg-gradient-primary hover:opacity-90">
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In
+            </Button>
+          </div>
+        </nav>
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="container mx-auto px-4 py-20">
-          <div className="text-center space-y-8 max-w-4xl mx-auto">
-            <div className="space-y-4 animate-fade-in">
-              <h1 className="text-5xl md:text-7xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                AutoQuiz
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-                Test your knowledge with interactive quizzes powered by intelligent question generation
-              </p>
-            </div>
-            
-            <div className="relative">
-              <img 
-                src={heroImage} 
-                alt="Interactive quiz interface with colorful elements" 
-                className="rounded-2xl shadow-glow mx-auto max-w-3xl w-full animate-slide-up"
-              />
-              <div className="absolute inset-0 bg-gradient-primary/20 rounded-2xl"></div>
-            </div>
+        {/* Hero Section */}
+        <div className="relative overflow-hidden">
+          <div className="container mx-auto px-4 py-20">
+            <div className="text-center space-y-8 max-w-4xl mx-auto">
+              <div className="space-y-4 animate-fade-in">
+                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+                  AutoQuiz
+                </h1>
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+                  Generate teacher-ready quizzes from any lesson content and auto-grade student submissions with AI
+                </p>
+              </div>
+              
+              <div className="relative">
+                <img 
+                  src={heroImage} 
+                  alt="Interactive quiz interface with colorful elements" 
+                  className="rounded-2xl shadow-glow mx-auto max-w-3xl w-full animate-slide-up"
+                />
+                <div className="absolute inset-0 bg-gradient-primary/20 rounded-2xl"></div>
+              </div>
 
-            <div className="animate-slide-up">
-              <Button 
-                size="lg" 
-                className="bg-gradient-primary hover:opacity-90 shadow-glow text-lg px-8 py-6 h-auto"
-                onClick={startQuiz}
-              >
-                <Play className="mr-2 h-6 w-6" />
-                Start Quiz Now
-              </Button>
+              <div className="animate-slide-up space-y-4">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-primary hover:opacity-90 shadow-glow text-lg px-8 py-6 h-auto"
+                  onClick={() => navigate('/auth')}
+                >
+                  <Play className="mr-2 h-6 w-6" />
+                  Get Started
+                </Button>
+                <p className="text-sm text-muted-foreground">
+                  Join as a teacher to create quizzes or as a student to take them
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Features Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <Card className="text-center border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-glow">
-            <CardHeader>
-              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mb-4">
-                <Brain className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Smart Questions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                AI-powered question generation ensures diverse and challenging content
-              </p>
-            </CardContent>
-          </Card>
+        {/* Features Section */}
+        <div className="container mx-auto px-4 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <Card className="text-center border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-glow">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mb-4">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-xl">AI Quiz Generation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Generate comprehensive quizzes from any lesson text with MCQ and short answer questions
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="text-center border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-glow">
-            <CardHeader>
-              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Instant Feedback</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Get immediate results and explanations to learn from every question
-              </p>
-            </CardContent>
-          </Card>
+            <Card className="text-center border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-glow">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-xl">Smart Auto-Grading</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  AI grades short answers with confidence scoring and flags items for teacher review
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="text-center border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-glow">
-            <CardHeader>
-              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mb-4">
-                <Target className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Track Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Monitor your performance and identify areas for improvement
-              </p>
-            </CardContent>
-          </Card>
+            <Card className="text-center border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-glow">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mb-4">
+                  <Target className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-xl">Teacher Ready</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Complete quiz management system with student tracking and detailed analytics
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+      </div>
+    );
+  }
+
+  // Handle quiz results view
+  if (currentView === "results" && submissionId) {
+    return (
+      <QuizResultsDetailed
+        submissionId={submissionId}
+        onBack={() => {
+          setCurrentView("dashboard");
+          setSubmissionId(null);
+        }}
+      />
+    );
+  }
+
+  // Handle taking quiz view
+  if (currentView === "taking-quiz" && selectedQuiz) {
+    return (
+      <TakeQuiz
+        quiz={selectedQuiz}
+        onComplete={(id) => {
+          setSubmissionId(id);
+          setCurrentView("results");
+        }}
+        onBack={() => {
+          setCurrentView("dashboard");
+          setSelectedQuiz(null);
+        }}
+      />
+    );
+  }
+
+  // Main dashboard view
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      {/* Navigation */}
+      <nav className="container mx-auto px-4 py-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+              AutoQuiz
+            </h1>
+            <div className="flex items-center gap-2">
+              {profile.role === 'teacher' ? (
+                <UserCheck className="h-5 w-5 text-primary" />
+              ) : (
+                <GraduationCap className="h-5 w-5 text-primary" />
+              )}
+              <span className="text-sm text-muted-foreground capitalize">
+                {profile.role}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">
+              Welcome, {profile.full_name || 'User'}
+            </span>
+            <Button variant="outline" onClick={signOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Teacher Quiz Generator */}
+        {profile.role === 'teacher' && (
+          <QuizGenerator
+            onQuizGenerated={() => setRefreshTrigger(prev => prev + 1)}
+          />
+        )}
+
+        {/* Quiz List */}
+        <QuizList
+          refreshTrigger={refreshTrigger}
+          onTakeQuiz={(quiz) => {
+            setSelectedQuiz(quiz);
+            setCurrentView("taking-quiz");
+          }}
+          onEditQuiz={(quiz) => {
+            // TODO: Implement edit functionality
+            console.log('Edit quiz:', quiz);
+          }}
+        />
       </div>
     </div>
   );

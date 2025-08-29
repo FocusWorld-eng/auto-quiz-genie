@@ -1,1 +1,7 @@
 project_id = "zxxutwglxbfqesyprvxp"
+
+[functions.generate-quiz]
+verify_jwt = true
+
+[functions.grade]
+verify_jwt = true
