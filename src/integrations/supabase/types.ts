@@ -44,105 +44,24 @@ export type Database = {
         }
         Relationships: []
       }
-      question_responses: {
-        Row: {
-          ai_feedback: string | null
-          confidence: Database["public"]["Enums"]["confidence_level"] | null
-          created_at: string
-          id: string
-          is_correct: boolean | null
-          points_earned: number | null
-          question_id: string
-          requires_manual_review: boolean
-          student_answer: string
-          submission_id: string
-          teacher_feedback: string | null
-          teacher_override_score: number | null
-        }
-        Insert: {
-          ai_feedback?: string | null
-          confidence?: Database["public"]["Enums"]["confidence_level"] | null
-          created_at?: string
-          id?: string
-          is_correct?: boolean | null
-          points_earned?: number | null
-          question_id: string
-          requires_manual_review?: boolean
-          student_answer: string
-          submission_id: string
-          teacher_feedback?: string | null
-          teacher_override_score?: number | null
-        }
-        Update: {
-          ai_feedback?: string | null
-          confidence?: Database["public"]["Enums"]["confidence_level"] | null
-          created_at?: string
-          id?: string
-          is_correct?: boolean | null
-          points_earned?: number | null
-          question_id?: string
-          requires_manual_review?: boolean
-          student_answer?: string
-          submission_id?: string
-          teacher_feedback?: string | null
-          teacher_override_score?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "question_responses_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "question_responses_submission_id_fkey"
-            columns: ["submission_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_submissions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       questions: {
         Row: {
-          correct_answer_index: number | null
-          created_at: string
-          grading_rubric: string | null
+          created_at: string | null
           id: string
-          options: Json | null
-          order_number: number
-          points: number
-          question_text: string
-          question_type: Database["public"]["Enums"]["question_type"]
-          quiz_id: string
-          sample_answer: string | null
+          q: Json | null
+          quiz_id: string | null
         }
         Insert: {
-          correct_answer_index?: number | null
-          created_at?: string
-          grading_rubric?: string | null
+          created_at?: string | null
           id?: string
-          options?: Json | null
-          order_number: number
-          points?: number
-          question_text: string
-          question_type: Database["public"]["Enums"]["question_type"]
-          quiz_id: string
-          sample_answer?: string | null
+          q?: Json | null
+          quiz_id?: string | null
         }
         Update: {
-          correct_answer_index?: number | null
-          created_at?: string
-          grading_rubric?: string | null
+          created_at?: string | null
           id?: string
-          options?: Json | null
-          order_number?: number
-          points?: number
-          question_text?: string
-          question_type?: Database["public"]["Enums"]["question_type"]
-          quiz_id?: string
-          sample_answer?: string | null
+          q?: Json | null
+          quiz_id?: string | null
         }
         Relationships: [
           {
@@ -154,100 +73,64 @@ export type Database = {
           },
         ]
       }
-      quiz_submissions: {
+      quizzes: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
-          is_completed: boolean
-          max_possible_score: number | null
-          needs_review: boolean
-          quiz_id: string
-          started_at: string
-          student_id: string
-          submitted_at: string | null
-          total_score: number | null
+          meta: Json | null
+          title: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id?: string
-          is_completed?: boolean
-          max_possible_score?: number | null
-          needs_review?: boolean
-          quiz_id: string
-          started_at?: string
-          student_id: string
-          submitted_at?: string | null
-          total_score?: number | null
+          meta?: Json | null
+          title: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
-          is_completed?: boolean
-          max_possible_score?: number | null
-          needs_review?: boolean
-          quiz_id?: string
-          started_at?: string
-          student_id?: string
-          submitted_at?: string | null
-          total_score?: number | null
+          meta?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          answers: Json | null
+          created_at: string | null
+          graded: Json | null
+          id: string
+          quiz_id: string | null
+          score: number | null
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json | null
+          created_at?: string | null
+          graded?: Json | null
+          id?: string
+          quiz_id?: string | null
+          score?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json | null
+          created_at?: string | null
+          graded?: Json | null
+          id?: string
+          quiz_id?: string | null
+          score?: number | null
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "quiz_submissions_quiz_id_fkey"
+            foreignKeyName: "submissions_quiz_id_fkey"
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quizzes"
             referencedColumns: ["id"]
           },
         ]
-      }
-      quizzes: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          is_published: boolean
-          lesson_text: string
-          mcq_count: number
-          short_answer_count: number
-          time_limit: number | null
-          title: string
-          topic: string
-          total_questions: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          is_published?: boolean
-          lesson_text: string
-          mcq_count?: number
-          short_answer_count?: number
-          time_limit?: number | null
-          title: string
-          topic: string
-          total_questions?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          is_published?: boolean
-          lesson_text?: string
-          mcq_count?: number
-          short_answer_count?: number
-          time_limit?: number | null
-          title?: string
-          topic?: string
-          total_questions?: number
-          updated_at?: string
-        }
-        Relationships: []
       }
     }
     Views: {
