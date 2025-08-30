@@ -129,7 +129,7 @@ export function TakeQuiz({ quiz, onComplete, onBack }: TakeQuizProps) {
 
       setQuestions((questionsData || []).map(q => ({ 
         ...q, 
-        options: Array.isArray(q.options) ? q.options : []
+        options: Array.isArray(q.options) ? q.options as string[] : []
       })));
       setSubmissionId(currentSubmissionId);
       setLoading(false);

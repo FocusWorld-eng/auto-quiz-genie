@@ -110,7 +110,13 @@ export function QuizResultsDetailed({ submissionId, onBack }: QuizResultsDetaile
         ...submissionData,
         quiz: submissionData.quizzes
       });
-      setResponses((responsesData || []).map(r => ({ ...r, question: r.questions })));
+      setResponses((responsesData || []).map(r => ({ 
+        ...r, 
+        question: {
+          ...r.questions,
+          options: Array.isArray(r.questions.options) ? r.questions.options as string[] : []
+        }
+      })));
     } catch (error) {
       console.error('Error fetching results:', error);
       toast({
