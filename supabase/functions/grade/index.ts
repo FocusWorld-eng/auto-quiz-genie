@@ -50,110 +50,73 @@ serve(async (req) => {
 
     console.log('Found', questions.length, 'questions and', submission.answers?.length || 0, 'answers');
 
-    let totalScore = 0;
-    let maxPossibleScore = 0;
-    const gradedResults: any[] = [];
+    // Prepare quiz data for AI grading
+    const quizJson = questions.map(q => q.q);
+    const studentAnswers = submission.answers || [];
 
-    for (const question of questions) {
-      const questionData = question.q;
-      const answer = submission.answers?.find((a: any) => a.questionId === questionData.id);
-      
-      maxPossibleScore += questionData.weight || 1;
-      
-      if (!answer) {
-        gradedResults.push({
-          id: questionData.id,
-          score: 0,
-          max: questionData.weight || 1,
-          confidence: 'high',
-          explanation: 'No answer provided'
-        });
-        continue;
-      }
+    // Use new comprehensive grading prompt
+    const gradingInput = {
+      quiz_json: quizJson,
+      student_answers: studentAnswers
+    };
 
-      if (questionData.type === 'mcq') {
-        // Multiple choice - exact match
-        const correctChoice = questionData.choices?.find((c: any) => c.is_correct);
-        const isCorrect = answer.choiceLabel === correctChoice?.label;
-        const score = isCorrect ? (questionData.weight || 1) : 0;
-        
-        totalScore += score;
-        gradedResults.push({
-          id: questionData.id,
-          score,
-          max: questionData.weight || 1,
-          confidence: 'high',
-          explanation: isCorrect ? 'Correct answer!' : `Incorrect. The correct answer was ${correctChoice?.label}: ${correctChoice?.text}`
-        });
-      } else {
-        // Short answer - use AI to grade
-        const gradingPrompt = `
-Grade this short answer question:
-
-Question: ${questionData.question_text}
-Model Answer: ${questionData.model_answer}
-Student Answer: ${answer.answerText}
-Rubric: ${questionData.rubric_explainer}
-Max Points: ${questionData.weight || 1}
-
-Respond with JSON only:
-{
-  "score": number (0 to ${questionData.weight || 1}),
-  "confidence": "high"|"medium"|"low",
-  "explanation": "detailed explanation of grading"
-}`;
-
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIApiKey}`,
-            'Content-Type': 'application/json',
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-2025-08-07',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are an objective grader. Output valid JSON ONLY.' 
           },
-          body: JSON.stringify({
-            model: 'gpt-5-2025-08-07',
-            messages: [
-              { role: 'user', content: gradingPrompt }
-            ],
-            max_completion_tokens: 500,
-          }),
-        });
+          { 
+            role: 'user', 
+            content: `Grade the student answers against the model answers. For each question return: { id, score, max, confidence (0-1), explanation }.
+Also return overall: { total_score, max_score, overall_feedback }.
+Input: ${JSON.stringify(gradingInput)}.
+Rubric: follow question.rubric_explainer.
+Return only JSON.` 
+          }
+        ],
+        max_completion_tokens: 2000,
+      }),
+    });
 
-        if (!response.ok) {
-          console.error('OpenAI grading error:', await response.text());
-          // Fallback scoring
-          gradedResults.push({
-            id: questionData.id,
-            score: Math.floor((questionData.weight || 1) * 0.5), // 50% fallback
-            max: questionData.weight || 1,
-            confidence: 'low',
-            explanation: 'Auto-grading failed - manual review required'
-          });
-          totalScore += Math.floor((questionData.weight || 1) * 0.5);
-          continue;
+    if (!response.ok) {
+      console.error('OpenAI grading error:', await response.text());
+      throw new Error('AI grading failed');
+    }
+
+    const gradingData = await response.json();
+    let gradingResult;
+    
+    try {
+      gradingResult = JSON.parse(gradingData.choices[0].message.content.trim());
+      console.log('AI grading result:', gradingResult);
+    } catch (parseError) {
+      console.error('Failed to parse grading result:', parseError);
+      throw new Error('Failed to parse AI grading response');
+    }
+
+    const { total_score: totalScore, max_score: maxPossibleScore, overall_feedback } = gradingResult;
+    // Handle different possible response formats from AI
+    let gradedResults = [];
+    if (Array.isArray(gradingResult.questions)) {
+      gradedResults = gradingResult.questions;
+    } else if (Array.isArray(gradingResult)) {
+      // If the whole result is an array of questions
+      gradedResults = gradingResult;
+    } else {
+      // Look for any array in the response that contains question results
+      for (const key of Object.keys(gradingResult)) {
+        if (Array.isArray(gradingResult[key]) && gradingResult[key].length > 0 && gradingResult[key][0].id) {
+          gradedResults = gradingResult[key];
+          break;
         }
-
-        const gradingData = await response.json();
-        let gradingResult;
-        
-        try {
-          gradingResult = JSON.parse(gradingData.choices[0].message.content.trim());
-        } catch {
-          // Fallback if JSON parsing fails
-          gradingResult = {
-            score: Math.floor((questionData.weight || 1) * 0.7),
-            confidence: 'low',
-            explanation: 'Grading response parsing failed - manual review recommended'
-          };
-        }
-
-        totalScore += gradingResult.score;
-        gradedResults.push({
-          id: questionData.id,
-          score: gradingResult.score,
-          max: questionData.weight || 1,
-          confidence: gradingResult.confidence,
-          explanation: gradingResult.explanation
-        });
       }
     }
 
@@ -178,7 +141,8 @@ Respond with JSON only:
         success: true,
         totalScore,
         maxPossibleScore,
-        graded: gradedResults
+        graded: gradedResults,
+        overall_feedback
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
