@@ -61,7 +61,7 @@ const Auth = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            Welcome to AutoQuiz
+            Welcome to Study with Focus
           </CardTitle>
         </CardHeader>
         

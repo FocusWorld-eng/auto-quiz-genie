@@ -46,7 +46,7 @@ const Index = () => {
         <nav className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              AutoQuiz
+              Study with Focus
             </h1>
             <Button onClick={() => navigate('/auth')} className="bg-gradient-primary hover:opacity-90">
               <LogIn className="mr-2 h-4 w-4" />
@@ -61,7 +61,7 @@ const Index = () => {
             <div className="text-center space-y-8 max-w-4xl mx-auto">
               <div className="space-y-4 animate-fade-in">
                 <h1 className="text-5xl md:text-7xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                  AutoQuiz
+                  Study with Focus
                 </h1>
                 <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
                   Generate teacher-ready quizzes from any lesson content and auto-grade student submissions with AI
@@ -182,7 +182,7 @@ const Index = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              AutoQuiz
+              Study with Focus
             </h1>
             <div className="flex items-center gap-2">
               {profile.role === 'teacher' ? (
