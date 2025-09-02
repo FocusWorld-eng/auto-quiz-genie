@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { QuizGenerator } from "@/components/QuizGenerator";
-import { QuizList } from "@/components/QuizList";
-import { TakeQuiz } from "@/components/TakeQuiz";
-import { QuizResultsDetailed } from "@/components/QuizResultsDetailed";
+import { SimpleQuizGenerator } from "@/components/SimpleQuizGenerator";
+import { SimpleQuizList } from "@/components/SimpleQuizList";
+import { SimpleTakeQuiz } from "@/components/SimpleTakeQuiz";
+import { SimpleQuizResults } from "@/components/SimpleQuizResults";
 import { useAuth } from "@/hooks/useAuth";
 import { Play, Brain, Zap, Target, LogIn, UserCheck, GraduationCap, LogOut } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
@@ -13,10 +13,12 @@ import { useNavigate } from "react-router-dom";
 interface Quiz {
   id: string;
   title: string;
-  description: string;
-  topic: string;
-  total_questions: number;
-  time_limit: number;
+  meta: {
+    description?: string;
+    topic?: string;
+    total_questions?: number;
+  };
+  created_at: string;
 }
 
 const Index = () => {
@@ -145,7 +147,7 @@ const Index = () => {
   // Handle quiz results view
   if (currentView === "results" && submissionId) {
     return (
-      <QuizResultsDetailed
+      <SimpleQuizResults
         submissionId={submissionId}
         onBack={() => {
           setCurrentView("dashboard");
@@ -158,7 +160,7 @@ const Index = () => {
   // Handle taking quiz view
   if (currentView === "taking-quiz" && selectedQuiz) {
     return (
-      <TakeQuiz
+      <SimpleTakeQuiz
         quiz={selectedQuiz}
         onComplete={(id) => {
           setSubmissionId(id);
@@ -208,21 +210,17 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Teacher Quiz Generator */}
         {profile.role === 'teacher' && (
-          <QuizGenerator
+          <SimpleQuizGenerator
             onQuizGenerated={() => setRefreshTrigger(prev => prev + 1)}
           />
         )}
 
         {/* Quiz List */}
-        <QuizList
+        <SimpleQuizList
           refreshTrigger={refreshTrigger}
           onTakeQuiz={(quiz) => {
             setSelectedQuiz(quiz);
             setCurrentView("taking-quiz");
-          }}
-          onEditQuiz={(quiz) => {
-            // TODO: Implement edit functionality
-            console.log('Edit quiz:', quiz);
           }}
         />
       </div>
