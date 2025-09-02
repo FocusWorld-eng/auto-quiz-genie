@@ -8,6 +8,7 @@ import { SimpleQuizResults } from "@/components/SimpleQuizResults";
 import { useAuth } from "@/hooks/useAuth";
 import { Play, Brain, Zap, Target, LogIn, UserCheck, GraduationCap, LogOut } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import studyFocusBg from "@/assets/study-focus-bg.png";
 import { useNavigate } from "react-router-dom";
 
 interface Quiz {
@@ -41,7 +42,18 @@ const Index = () => {
   // Not authenticated - show landing page
   if (!user || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Animated Background */}
+        <div 
+          className="absolute inset-0 opacity-20 animate-bg-slide"
+          style={{
+            backgroundImage: `url(${studyFocusBg})`,
+            backgroundSize: '400% 400%',
+            backgroundPosition: '0% 50%'
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-secondary/40" />
+        <div className="relative z-10">
         {/* Navigation */}
         <nav className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
@@ -140,6 +152,7 @@ const Index = () => {
             </Card>
           </div>
         </div>
+        </div>
       </div>
     );
   }
@@ -176,7 +189,18 @@ const Index = () => {
 
   // Main dashboard view
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div 
+        className="absolute inset-0 opacity-10 animate-bg-slide"
+        style={{
+          backgroundImage: `url(${studyFocusBg})`,
+          backgroundSize: '400% 400%',
+          backgroundPosition: '0% 50%'
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/90 to-secondary/30" />
+      <div className="relative z-10">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
@@ -223,6 +247,7 @@ const Index = () => {
             setCurrentView("taking-quiz");
           }}
         />
+      </div>
       </div>
     </div>
   );
