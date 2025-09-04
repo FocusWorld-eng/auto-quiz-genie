@@ -43,16 +43,16 @@ const Index = () => {
   if (!user || !profile) {
     return (
       <div className="min-h-screen relative overflow-hidden">
-        {/* Animated Background */}
+        {/* Background */}
         <div 
-          className="absolute inset-0 opacity-20 animate-bg-slide"
+          className="absolute inset-0 opacity-60"
           style={{
             backgroundImage: `url(${studyFocusBg})`,
-            backgroundSize: '400% 400%',
-            backgroundPosition: '0% 50%'
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-secondary/40" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background/40 to-secondary/20" />
         <div className="relative z-10">
         {/* Navigation */}
         <nav className="container mx-auto px-4 py-6">
@@ -190,16 +190,16 @@ const Index = () => {
   // Main dashboard view
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background */}
+      {/* Background */}
       <div 
-        className="absolute inset-0 opacity-10 animate-bg-slide"
+        className="absolute inset-0 opacity-40"
         style={{
           backgroundImage: `url(${studyFocusBg})`,
-          backgroundSize: '400% 400%',
-          backgroundPosition: '0% 50%'
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-br from-background/90 to-secondary/30" />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/60 to-secondary/20" />
       <div className="relative z-10">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6">
