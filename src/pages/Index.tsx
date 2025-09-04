@@ -6,7 +6,7 @@ import { SimpleQuizList } from "@/components/SimpleQuizList";
 import { SimpleTakeQuiz } from "@/components/SimpleTakeQuiz";
 import { SimpleQuizResults } from "@/components/SimpleQuizResults";
 import { useAuth } from "@/hooks/useAuth";
-import { Play, Brain, Zap, Target, LogIn, UserCheck, GraduationCap, LogOut } from "lucide-react";
+import { Play, Brain, Zap, Target, LogIn, UserCheck, GraduationCap, LogOut, MessageCircle } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import studyFocusBg from "@/assets/study-focus-bg.png";
 import { useNavigate } from "react-router-dom";
@@ -223,6 +223,12 @@ const Index = () => {
             <span className="text-sm text-muted-foreground">
               Welcome, {profile.full_name || 'User'}
             </span>
+            {profile.role === 'student' && (
+              <Button variant="secondary" onClick={() => navigate('/student-qa')}>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Ask Tutor
+              </Button>
+            )}
             <Button variant="outline" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

@@ -21,30 +21,43 @@ serve(async (req) => {
       auth: { persistSession: false }
     });
 
-    const { topicText, numQuestions = 5 } = await req.json();
+    const { topicText, course, difficulty, numQuestions = 5 } = await req.json();
     
-    console.log('Generating quiz for topic:', topicText, 'with', numQuestions, 'questions');
+    console.log('Generating quiz for:', { topicText, course, difficulty, numQuestions });
 
-    const systemPrompt = `You are an educational quiz generator. Output must be valid JSON ONLY.`;
+    const systemPrompt = `You are an expert ${course} educator. Generate comprehensive science quizzes with educational value.`;
     
-    const userPrompt = `Generate ${numQuestions} questions from the following topic. Provide a JSON object with:
+    const userPrompt = `Generate ${numQuestions} ${difficulty} level questions for ${course} based on this content: "${topicText}"
+
+Create a balanced mix of multiple choice (70%) and short answer (30%) questions that test:
+- Conceptual understanding
+- Problem-solving skills  
+- Application of principles
+- Scientific reasoning
+
+Provide a JSON object with:
 {
- "quiz_title": string,
+ "quiz_title": "Engaging title for ${course} quiz",
  "questions": [
    {
-    "id": string,
+    "id": "q1",
     "type": "mcq"|"short",
-    "difficulty": "easy"|"medium"|"hard",
-    "question_text": string,
-    "choices": [ { "label":"A","text":"...", "is_correct": true/false }, ... ]  // only for mcq
-    "model_answer": string,         // only for short
-    "rubric_explainer": string,
-    "weight": number
-   }, ...
+    "difficulty": "${difficulty}",
+    "question_text": "Clear, specific question",
+    "choices": [ 
+      { "label":"A", "text":"Option text", "is_correct": true/false },
+      { "label":"B", "text":"Option text", "is_correct": false },
+      { "label":"C", "text":"Option text", "is_correct": false },
+      { "label":"D", "text":"Option text", "is_correct": false }
+    ],  // only for mcq
+    "model_answer": "Expected 2-3 sentence answer with key concepts",  // only for short
+    "rubric_explainer": "Detailed grading criteria",
+    "weight": 1
+   }
  ]
 }
-USER DATA: ${topicText}
-Return only the JSON.`;
+
+Return only valid JSON.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -87,8 +100,10 @@ Return only the JSON.`;
       .insert({
         title: quizData.quiz_title,
         meta: { 
-          description: `Quiz on ${topicText}`,
-          topic: topicText,
+          description: `${difficulty} level ${course} quiz`,
+          topic: course,
+          course: course,
+          difficulty: difficulty,
           total_questions: numQuestions
         }
       })
