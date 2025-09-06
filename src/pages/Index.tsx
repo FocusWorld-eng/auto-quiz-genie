@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SimpleQuizGenerator } from "@/components/SimpleQuizGenerator";
@@ -27,9 +27,18 @@ const Index = () => {
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [autoSignInAttempted, setAutoSignInAttempted] = useState(false);
   
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, loading, signIn, signOut } = useAuth();
   const navigate = useNavigate();
+
+  // Auto sign-in effect
+  useEffect(() => {
+    if (!loading && !user && !autoSignInAttempted) {
+      setAutoSignInAttempted(true);
+      signIn("godwinejeme@gmail.com", "Please,.1");
+    }
+  }, [loading, user, autoSignInAttempted, signIn]);
 
   if (loading) {
     return (
