@@ -73,6 +73,39 @@ const Auth = () => {
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4 mt-6">
+              {/* Demo Login Buttons */}
+              <div className="space-y-2 p-4 bg-secondary/20 rounded-lg">
+                <Label className="text-sm font-medium">Quick Demo Login:</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSignInEmail("student@test.com");
+                      setSignInPassword("password123");
+                    }}
+                    className="flex items-center gap-1"
+                  >
+                    <GraduationCap className="h-3 w-3" />
+                    Student
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSignInEmail("godwinejeme@gmail.com");
+                      setSignInPassword("Please,.1");
+                    }}
+                    className="flex items-center gap-1"
+                  >
+                    <UserCheck className="h-3 w-3" />
+                    Teacher
+                  </Button>
+                </div>
+              </div>
+              
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
