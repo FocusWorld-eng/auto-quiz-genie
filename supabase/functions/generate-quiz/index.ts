@@ -17,9 +17,35 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Generate quiz function called');
+    
+    // Get auth token from request
+    const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
+      global: {
+        headers: {
+          Authorization: authHeader || ''
+        }
+      }
     });
+
+    // Verify user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('User authenticated:', !!user, 'Auth error:', authError);
+    
+    if (!user) {
+      console.error('Authentication failed:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
     const { topicText, course, difficulty, numQuestions = 5 } = await req.json();
     
