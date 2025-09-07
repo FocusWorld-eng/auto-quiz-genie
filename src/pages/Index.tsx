@@ -36,7 +36,7 @@ const Index = () => {
   useEffect(() => {
     if (!loading && !user && !autoSignInAttempted) {
       setAutoSignInAttempted(true);
-      signIn("godwinejeme@gmail.com", "Please,.1");
+      signIn("student@test.com", "password123");
     }
   }, [loading, user, autoSignInAttempted, signIn]);
 
